@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Perbandingan Harga & Evaluasi Vendor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #ffbe0b;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-table th {
+            background-color: var(--light-color);
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .price-tag {
+            font-weight: 700;
+            color: var(--success-color);
+            font-size: 1.2rem;
+        }
+        
+        .advantage {
+            color: var(--success-color);
+        }
+        
+        .disadvantage {
+            color: var(--danger-color);
+        }
+        
+        .winner-badge {
+            background-color: var(--warning-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .summary-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 15px;
+        }
+        
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-bar-chart-line-fill me-2"></i>
+                VendorCompare
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="homeLink">
+                            <i class="bi bi-house-door me-1"></i> Beranda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="aboutLink">
+                            <i class="bi bi-info-circle me-1"></i> Tentang
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Home Page -->
+        <div id="homePage">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>Daftar Perbandingan Vendor</h2>
+                    <p class="text-muted">Kelola dan bandingkan vendor untuk keputusan terbaik Anda</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-primary" id="addComparisonBtn">
+                        <i class="bi bi-plus-circle me-1"></i> Tambah Perbandingan Baru
+                    </button>
+                </div>
+            </div>
+
+            <div id="comparisonsList" class="row">
+                <!-- Comparison cards will be dynamically added here -->
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="bi bi-inbox"></i>
+                <h4>Belum Ada Data Perbandingan</h4>
+                <p>Klik tombol "Tambah Perbandingan Baru" untuk memulai</p>
+            </div>
+        </div>
+
+        <!-- Add/Edit Comparison Form -->
+        <div id="comparisonFormPage" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2 id="formTitle">Tambah Perbandingan Baru</h2>
+                    <p class="text-muted">Isi informasi untuk memulai perbandingan vendor</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-secondary" id="cancelBtn">
+                        <i class="bi bi-x-circle me-1"></i> Batal
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form id="comparisonForm">
+                        <div class="mb-4">
+                            <label for="comparisonTitle" class="form-label fw-bold">Judul Pemilihan</label>
+                            <input type="text" class="form-control" id="comparisonTitle" placeholder="Contoh: Pemilihan Vendor Cloud Service" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Opsi Pilihan</h5>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addOptionBtn">
+                                    <i class="bi bi-plus-circle me-1"></i> Tambah Opsi
+                                </button>
+                            </div>
+                            <div id="optionsContainer">
+                                <!-- Options will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Simpan Perbandingan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Detail Page -->
+        <div id="comparisonDetailPage" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2 id="detailTitle">Detail Perbandingan</h2>
+                    <p class="text-muted">Analisis perbandingan vendor untuk keputusan terbaik</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-secondary me-2" id="backToListBtn">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali
+                    </button>
+                    <button class="btn btn-primary" id="editComparisonBtn">
+                        <i class="bi bi-pencil-square me-1"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs mb-4" id="detailTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison-tab-pane" type="button" role="tab">Perbandingan</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis-tab-pane" type="button" role="tab">Analisis</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="decision-tab" data-bs-toggle="tab" data-bs-target="#decision-tab-pane" type="button" role="tab">Keputusan</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="detailTabContent">
+                <!-- Comparison Tab -->
+                <div class="tab-pane fade show active" id="comparison-tab-pane" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="comparison-table" id="comparisonTable">
+                                    <!-- Comparison table will be dynamically generated here -->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Tab -->
+                <div class="tab-pane fade" id="analysis-tab-pane" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="summary-card">
+                                <h5 class="card-title">Perbandingan Harga</h5>
+                                <div class="chart-container">
+                                    <canvas id="priceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="summary-card">
+                                <h5 class="card-title">Analisis Kelebihan/Kekurangan</h5>
+                                <div id="advantagesDisadvantagesList">
+                                    <!-- Advantages and disadvantages will be listed here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Decision Tab -->
+                <div class="tab-pane fade" id="decision-tab-pane" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Pilih Opsi Terbaik</h5>
+                            <div id="decisionOptions">
+                                <!-- Decision options will be listed here -->
+                            </div>
+                            <div class="mt-4">
+                                <h6>Alasan Pemilihan:</h6>
+                                <textarea class="form-control" id="decisionReason" rows="3" placeholder="Jelaskan alasan Anda memilih opsi ini..."></textarea>
+                                <div class="text-end mt-3">
+                                    <button class="btn btn-primary" id="saveDecisionBtn">
+                                        <i class="bi bi-check-circle me-1"></i> Simpan Keputusan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="aboutPage" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>Tentang Aplikasi</h2>
+                    <p class="text-muted">Informasi tentang aplikasi perbandingan vendor</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-secondary" id="backToHomeFromAboutBtn">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Beranda
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">VendorCompare</h4>
+                    <p class="card-text">Aplikasi web ini dirancang untuk membantu Anda dalam melakukan perbandingan harga dan evaluasi vendor atau pemangku kepentingan. Dengan fitur-fitur yang intuitif, Anda dapat membuat keputusan yang lebih baik berdasarkan data yang terstruktur.</p>
+                    
+                    <h5 class="mt-4">Fitur Utama:</h5>
+                    <ul>
+                        <li>Input data master untuk judul pemilihan dan opsi-opsi yang tersedia</li>
+                        <li>Perbandingan harga antar opsi secara visual</li>
+                        <li>Ringkasan keuntungan dan kerugian dari setiap opsi</li>
+                        <li>Dasbor/tabel interaktif untuk memudahkan analisis</li>
+                        <li>Fitur pemilihan opsi terbaik dengan alasan pemilihan</li>
+                    </ul>
+                    
+                    <h5 class="mt-4">Cara Penggunaan:</h5>
+                    <ol>
+                        <li>Klik tombol "Tambah Perbandingan Baru" untuk membuat perbandingan vendor baru</li>
+                        <li>Isi judul pemilihan dan tambahkan opsi-opsi vendor yang ingin dibandingkan</li>
+                        <li>Untuk setiap opsi, masukkan harga, kelebihan, dan kekurangannya</li>
+                        <li>Simpan perbandingan dan lihat hasil analisis pada tab yang tersedia</li>
+                        <li>Buat keputusan akhir dengan memilih opsi terbaik beserta alasannya</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2023 VendorCompare. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>Dibuat dengan <i class="bi bi-heart-fill text-danger"></i> untuk membantu keputusan bisnis Anda</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Application state
+        let comparisons = JSON.parse(localStorage.getItem('comparisons')) || [];
+        let currentComparisonId = null;
+        let editingComparisonId = null;
+
+        // DOM elements
+        const homePage = document.getElementById('homePage');
+        const comparisonFormPage = document.getElementById('comparisonFormPage');
+        const comparisonDetailPage = document.getElementById('comparisonDetailPage');
+        const aboutPage = document.getElementById('aboutPage');
+        
+        const comparisonsList = document.getElementById('comparisonsList');
+        const emptyState = document.getElementById('emptyState');
+        const comparisonForm = document.getElementById('comparisonForm');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const comparisonTable = document.getElementById('comparisonTable');
+        const advantagesDisadvantagesList = document.getElementById('advantagesDisadvantagesList');
+        const decisionOptions = document.getElementById('decisionOptions');
+        
+        // Buttons
+        const addComparisonBtn = document.getElementById('addComparisonBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const addOptionBtn = document.getElementById('addOptionBtn');
+        const backToListBtn = document.getElementById('backToListBtn');
+        const editComparisonBtn = document.getElementById('editComparisonBtn');
+        const saveDecisionBtn = document.getElementById('saveDecisionBtn');
+        const homeLink = document.getElementById('homeLink');
+        const aboutLink = document.getElementById('aboutLink');
+        const backToHomeFromAboutBtn = document.getElementById('backToHomeFromAboutBtn');
+
+        // Event listeners
+        addComparisonBtn.addEventListener('click', showAddComparisonForm);
+        cancelBtn.addEventListener('click', showHomePage);
+        addOptionBtn.addEventListener('click', addOptionField);
+        comparisonForm.addEventListener('submit', saveComparison);
+        backToListBtn.addEventListener('click', showHomePage);
+        editComparisonBtn.addEventListener('click', editCurrentComparison);
+        saveDecisionBtn.addEventListener('click', saveDecision);
+        homeLink.addEventListener('click', showHomePage);
+        aboutLink.addEventListener('click', showAboutPage);
+        backToHomeFromAboutBtn.addEventListener('click', showHomePage);
+
+        // Initialize the app
+        function init() {
+            showHomePage();
+            renderComparisonsList();
+        }
+
+        // Page navigation functions
+        function showHomePage() {
+            homePage.style.display = 'block';
+            comparisonFormPage.style.display = 'none';
+            comparisonDetailPage.style.display = 'none';
+            aboutPage.style.display = 'none';
+            homeLink.classList.add('active');
+            aboutLink.classList.remove('active');
+        }
+
+        function showAddComparisonForm() {
+            homePage.style.display = 'none';
+            comparisonFormPage.style.display = 'block';
+            comparisonDetailPage.style.display = 'none';
+            aboutPage.style.display = 'none';
+            
+            document.getElementById('formTitle').textContent = 'Tambah Perbandingan Baru';
+            comparisonForm.reset();
+            optionsContainer.innerHTML = '';
+            editingComparisonId = null;
+            
+            // Add initial option fields
+            addOptionField();
+            addOptionField();
+        }
+
+        function showComparisonDetail(comparisonId) {
+            homePage.style.display = 'none';
+            comparisonFormPage.style.display = 'none';
+            comparisonDetailPage.style.display = 'block';
+            aboutPage.style.display = 'none';
+            
+            currentComparisonId = comparisonId;
+            const comparison = comparisons.find(c => c.id === comparisonId);
+            
+            document.getElementById('detailTitle').textContent = comparison.title;
+            
+            renderComparisonTable(comparison);
+            renderAnalysisTab(comparison);
+            renderDecisionTab(comparison);
+        }
+
+        function showAboutPage() {
+            homePage.style.display = 'none';
+            comparisonFormPage.style.display = 'none';
+            comparisonDetailPage.style.display = 'none';
+            aboutPage.style.display = 'block';
+            homeLink.classList.remove('active');
+            aboutLink.classList.add('active');
+        }
+
+        // Render functions
+        function renderComparisonsList() {
+            comparisonsList.innerHTML = '';
+            
+            if (comparisons.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            comparisons.forEach(comparison => {
+                const card = document.createElement('div');
+                card.className = 'col-md-4';
+                
+                const hasDecision = comparison.decision ? 
+                    `<span class="badge bg-success ms-2">Keputusan: ${comparison.decision.selectedOption}</span>` : 
+                    '<span class="badge bg-warning text-dark ms-2">Belum Ada Keputusan</span>';
+                
+                card.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>${comparison.title}</span>
+                            ${hasDecision}
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Jumlah Opsi: ${comparison.options.length}</p>
+                            <p class="card-text">Rentang Harga: ${formatPrice(getMinPrice(comparison.options))} - ${formatPrice(getMaxPrice(comparison.options))}</p>
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-sm btn-outline-primary view-btn" data-id="${comparison.id}">
+                                    <i class="bi bi-eye me-1"></i> Lihat Detail
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${comparison.id}">
+                                    <i class="bi bi-trash me-1"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                comparisonsList.appendChild(card);
+            });
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const comparisonId = parseInt(e.currentTarget.getAttribute('data-id'));
+                    showComparisonDetail(comparisonId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const comparisonId = parseInt(e.currentTarget.getAttribute('data-id'));
+                    deleteComparison(comparisonId);
+                });
+            });
+        }
+
+        function renderComparisonTable(comparison) {
+            comparisonTable.innerHTML = '';
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            const criteriaHeader = document.createElement('th');
+            criteriaHeader.textContent = 'Kriteria';
+            headerRow.appendChild(criteriaHeader);
+            
+            comparison.options.forEach(option => {
+                const optionHeader = document.createElement('th');
+                optionHeader.textContent = option.name;
+                headerRow.appendChild(optionHeader);
+            });
+            
+            thead.appendChild(headerRow);
+            comparisonTable.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            // Price row
+            const priceRow = document.createElement('tr');
+            const priceLabel = document.createElement('td');
+            priceLabel.innerHTML = '<strong>Harga</strong>';
+            priceRow.appendChild(priceLabel);
+            
+            comparison.options.forEach(option => {
+                const priceCell = document.createElement('td');
+                priceCell.className = 'price-tag';
+                priceCell.textContent = formatPrice(option.price);
+                priceRow.appendChild(priceCell);
+            });
+            
+            tbody.appendChild(priceRow);
+            
+            // Advantages row
+            const advantagesRow = document.createElement('tr');
+            const advantagesLabel = document.createElement('td');
+            advantagesLabel.innerHTML = '<strong class="advantage">Kelebihan</strong>';
+            advantagesRow.appendChild(advantagesLabel);
+            
+            comparison.options.forEach(option => {
+                const advantagesCell = document.createElement('td');
+                const advantagesList = document.createElement('ul');
+                advantagesList.className = 'list-unstyled';
+                
+                option.advantages.forEach(advantage => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="bi bi-check-circle-fill advantage me-1"></i> ${advantage}`;
+                    advantagesList.appendChild(li);
+                });
+                
+                advantagesCell.appendChild(advantagesList);
+                advantagesRow.appendChild(advantagesCell);
+            });
+            
+            tbody.appendChild(advantagesRow);
+            
+            // Disadvantages row
+            const disadvantagesRow = document.createElement('tr');
+            const disadvantagesLabel = document.createElement('td');
+            disadvantagesLabel.innerHTML = '<strong class="disadvantage">Kekurangan</strong>';
+            disadvantagesRow.appendChild(disadvantagesLabel);
+            
+            comparison.options.forEach(option => {
+                const disadvantagesCell = document.createElement('td');
+                const disadvantagesList = document.createElement('ul');
+                disadvantagesList.className = 'list-unstyled';
+                
+                option.disadvantages.forEach(disadvantage => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="bi bi-x-circle-fill disadvantage me-1"></i> ${disadvantage}`;
+                    disadvantagesList.appendChild(li);
+                });
+                
+                disadvantagesCell.appendChild(disadvantagesList);
+                disadvantagesRow.appendChild(disadvantagesCell);
+            });
+            
+            tbody.appendChild(disadvantagesRow);
+            
+            comparisonTable.appendChild(tbody);
+        }
+
+        function renderAnalysisTab(comparison) {
+            // Render price chart
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.priceChart) {
+                window.priceChart.destroy();
+            }
+            
+            window.priceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: comparison.options.map(option => option.name),
+                    datasets: [{
+                        label: 'Harga',
+                        data: comparison.options.map(option => option.price),
+                        backgroundColor: [
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(76, 201, 240, 0.7)',
+                            'rgba(247, 37, 133, 0.7)',
+                            'rgba(255, 190, 11, 0.7)',
+                            'rgba(24, 44, 97, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(67, 97, 238, 1)',
+                            'rgba(76, 201, 240, 1)',
+                            'rgba(247, 37, 133, 1)',
+                            'rgba(255, 190, 11, 1)',
+                            'rgba(24, 44, 97, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Harga: Rp ' + context.raw.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Render advantages and disadvantages list
+            advantagesDisadvantagesList.innerHTML = '';
+            
+            comparison.options.forEach(option => {
+                const optionCard = document.createElement('div');
+                optionCard.className = 'mb-3';
+                
+                let advantagesHtml = '';
+                option.advantages.forEach(advantage => {
+                    advantagesHtml += `<li><i class="bi bi-check-circle-fill advantage me-1"></i> ${advantage}</li>`;
+                });
+                
+                let disadvantagesHtml = '';
+                option.disadvantages.forEach(disadvantage => {
+                    disadvantagesHtml += `<li><i class="bi bi-x-circle-fill disadvantage me-1"></i> ${disadvantage}</li>`;
+                });
+                
+                optionCard.innerHTML = `
+                    <h6>${option.name} - ${formatPrice(option.price)}</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Kelebihan:</strong></p>
+                            <ul class="list-unstyled">
+                                ${advantagesHtml}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Kekurangan:</strong></p>
+                            <ul class="list-unstyled">
+                                ${disadvantagesHtml}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                advantagesDisadvantagesList.appendChild(optionCard);
+            });
+        }
+
+        function renderDecisionTab(comparison) {
+            decisionOptions.innerHTML = '';
+            
+            comparison.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'form-check mb-3';
+                
+                const isSelected = comparison.decision && comparison.decision.selectedOption === option.name;
+                
+                optionDiv.innerHTML = `
+                    <input class="form-check-input" type="radio" name="decisionOption" id="option${index}" value="${option.name}" ${isSelected ? 'checked' : ''}>
+                    <label class="form-check-label" for="option${index}">
+                        <strong>${option.name}</strong> - ${formatPrice(option.price)}
+                        ${isSelected ? '<span class="winner-badge ms-2">Pilihan Terbaik</span>' : ''}
+                    </label>
+                `;
+                
+                decisionOptions.appendChild(optionDiv);
+            });
+            
+            if (comparison.decision) {
+                document.getElementById('decisionReason').value = comparison.decision.reason || '';
+            } else {
+                document.getElementById('decisionReason').value = '';
+            }
+        }
+
+        // Option management functions
+        function addOptionField() {
+            const optionIndex = optionsContainer.children.length;
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'card mb-3';
+            optionDiv.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Opsi ${optionIndex + 1}</h5>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-option-btn">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Opsi</label>
+                        <input type="text" class="form-control option-name" placeholder="Contoh: Vendor A" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Harga (Rp)</label>
+                        <input type="number" class="form-control option-price" placeholder="Contoh: 10000000" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kelebihan</label>
+                        <div class="option-advantages-container">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control option-advantage" placeholder="Kelebihan 1">
+                                <button type="button" class="btn btn-outline-success add-advantage-btn">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kekurangan</label>
+                        <div class="option-disadvantages-container">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control option-disadvantage" placeholder="Kekurangan 1">
+                                <button type="button" class="btn btn-outline-success add-disadvantage-btn">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            optionsContainer.appendChild(optionDiv);
+            
+            // Add event listeners
+            optionDiv.querySelector('.remove-option-btn').addEventListener('click', function() {
+                optionDiv.remove();
+                updateOptionIndices();
+            });
+            
+            optionDiv.querySelector('.add-advantage-btn').addEventListener('click', function() {
+                const advantagesContainer = optionDiv.querySelector('.option-advantages-container');
+                const advantageIndex = advantagesContainer.children.length;
+                
+                const advantageDiv = document.createElement('div');
+                advantageDiv.className = 'input-group mb-2';
+                advantageDiv.innerHTML = `
+                    <input type="text" class="form-control option-advantage" placeholder="Kelebihan ${advantageIndex + 1}">
+                    <button type="button" class="btn btn-outline-danger remove-advantage-btn">
+                        <i class="bi bi-dash-circle"></i>
+                    </button>
+                `;
+                
+                advantagesContainer.appendChild(advantageDiv);
+                
+                advantageDiv.querySelector('.remove-advantage-btn').addEventListener('click', function() {
+                    advantageDiv.remove();
+                });
+            });
+            
+            optionDiv.querySelector('.add-disadvantage-btn').addEventListener('click', function() {
+                const disadvantagesContainer = optionDiv.querySelector('.option-disadvantages-container');
+                const disadvantageIndex = disadvantagesContainer.children.length;
+                
+                const disadvantageDiv = document.createElement('div');
+                disadvantageDiv.className = 'input-group mb-2';
+                disadvantageDiv.innerHTML = `
+                    <input type="text" class="form-control option-disadvantage" placeholder="Kekurangan ${disadvantageIndex + 1}">
+                    <button type="button" class="btn btn-outline-danger remove-disadvantage-btn">
+                        <i class="bi bi-dash-circle"></i>
+                    </button>
+                `;
+                
+                disadvantagesContainer.appendChild(disadvantageDiv);
+                
+                disadvantageDiv.querySelector('.remove-disadvantage-btn').addEventListener('click', function() {
+                    disadvantageDiv.remove();
+                });
+            });
+        }
+
+        function updateOptionIndices() {
+            Array.from(optionsContainer.children).forEach((optionDiv, index) => {
+                optionDiv.querySelector('h5').textContent = `Opsi ${index + 1}`;
+            });
+        }
+
+        // Data management functions
+        function saveComparison(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('comparisonTitle').value;
+            const options = [];
+            
+            Array.from(optionsContainer.children).forEach(optionDiv => {
+                const name = optionDiv.querySelector('.option-name').value;
+                const price = parseInt(optionDiv.querySelector('.option-price').value);
+                
+                const advantages = Array.from(optionDiv.querySelectorAll('.option-advantage'))
+                    .map(input => input.value)
+                    .filter(value => value.trim() !== '');
+                
+                const disadvantages = Array.from(optionDiv.querySelectorAll('.option-disadvantage'))
+                    .map(input => input.value)
+                    .filter(value => value.trim() !== '');
+                
+                options.push({
+                    name,
+                    price,
+                    advantages,
+                    disadvantages
+                });
+            });
+            
+            const comparison = {
+                id: editingComparisonId || Date.now(),
+                title,
+                options,
+                createdAt: editingComparisonId ? 
+                    comparisons.find(c => c.id === editingComparisonId).createdAt : 
+                    new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                decision: editingComparisonId ? 
+                    comparisons.find(c => c.id === editingComparisonId).decision : 
+                    null
+            };
+            
+            if (editingComparisonId) {
+                const index = comparisons.findIndex(c => c.id === editingComparisonId);
+                comparisons[index] = comparison;
+            } else {
+                comparisons.push(comparison);
+            }
+            
+            localStorage.setItem('comparisons', JSON.stringify(comparisons));
+            
+            showHomePage();
+            renderComparisonsList();
+        }
+
+        function deleteComparison(comparisonId) {
+            if (confirm('Apakah Anda yakin ingin menghapus perbandingan ini?')) {
+                comparisons = comparisons.filter(c => c.id !== comparisonId);
+                localStorage.setItem('comparisons', JSON.stringify(comparisons));
+                renderComparisonsList();
+            }
+        }
+
+        function editCurrentComparison() {
+            const comparison = comparisons.find(c => c.id === currentComparisonId);
+            
+            homePage.style.display = 'none';
+            comparisonFormPage.style.display = 'block';
+            comparisonDetailPage.style.display = 'none';
+            
+            document.getElementById('formTitle').textContent = 'Edit Perbandingan';
+            document.getElementById('comparisonTitle').value = comparison.title;
+            
+            optionsContainer.innerHTML = '';
+            editingComparisonId = currentComparisonId;
+            
+            comparison.options.forEach(option => {
+                addOptionField();
+                const optionDiv = optionsContainer.lastElementChild;
+                
+                optionDiv.querySelector('.option-name').value = option.name;
+                optionDiv.querySelector('.option-price').value = option.price;
+                
+                const advantagesContainer = optionDiv.querySelector('.option-advantages-container');
+                advantagesContainer.innerHTML = '';
+                
+                option.advantages.forEach((advantage, index) => {
+                    const advantageDiv = document.createElement('div');
+                    advantageDiv.className = 'input-group mb-2';
+                    advantageDiv.innerHTML = `
+                        <input type="text" class="form-control option-advantage" placeholder="Kelebihan ${index + 1}" value="${advantage}">
+                        <button type="button" class="btn btn-outline-danger remove-advantage-btn">
+                            <i class="bi bi-dash-circle"></i>
+                        </button>
+                    `;
+                    
+                    advantagesContainer.appendChild(advantageDiv);
+                    
+                    advantageDiv.querySelector('.remove-advantage-btn').addEventListener('click', function() {
+                        advantageDiv.remove();
+                    });
+                });
+                
+                const disadvantagesContainer = optionDiv.querySelector('.option-disadvantages-container');
+                disadvantagesContainer.innerHTML = '';
+                
+                option.disadvantages.forEach((disadvantage, index) => {
+                    const disadvantageDiv = document.createElement('div');
+                    disadvantageDiv.className = 'input-group mb-2';
+                    disadvantageDiv.innerHTML = `
+                        <input type="text" class="form-control option-disadvantage" placeholder="Kekurangan ${index + 1}" value="${disadvantage}">
+                        <button type="button" class="btn btn-outline-danger remove-disadvantage-btn">
+                            <i class="bi bi-dash-circle"></i>
+                        </button>
+                    `;
+                    
+                    disadvantagesContainer.appendChild(disadvantageDiv);
+                    
+                    disadvantageDiv.querySelector('.remove-disadvantage-btn').addEventListener('click', function() {
+                        disadvantageDiv.remove();
+                    });
+                });
+                
+                // Add event listeners to the add buttons
+                optionDiv.querySelector('.add-advantage-btn').addEventListener('click', function() {
+                    const advantagesContainer = optionDiv.querySelector('.option-advantages-container');
+                    const advantageIndex = advantagesContainer.children.length;
+                    
+                    const advantageDiv = document.createElement('div');
+                    advantageDiv.className = 'input-group mb-2';
+                    advantageDiv.innerHTML = `
+                        <input type="text" class="form-control option-advantage" placeholder="Kelebihan ${advantageIndex + 1}">
+                        <button type="button" class="btn btn-outline-danger remove-advantage-btn">
+                            <i class="bi bi-dash-circle"></i>
+                        </button>
+                    `;
+                    
+                    advantagesContainer.appendChild(advantageDiv);
+                    
+                    advantageDiv.querySelector('.remove-advantage-btn').addEventListener('click', function() {
+                        advantageDiv.remove();
+                    });
+                });
+                
+                optionDiv.querySelector('.add-disadvantage-btn').addEventListener('click', function() {
+                    const disadvantagesContainer = optionDiv.querySelector('.option-disadvantages-container');
+                    const disadvantageIndex = disadvantagesContainer.children.length;
+                    
+                    const disadvantageDiv = document.createElement('div');
+                    disadvantageDiv.className = 'input-group mb-2';
+                    disadvantageDiv.innerHTML = `
+                        <input type="text" class="form-control option-disadvantage" placeholder="Kekurangan ${disadvantageIndex + 1}">
+                        <button type="button" class="btn btn-outline-danger remove-disadvantage-btn">
+                            <i class="bi bi-dash-circle"></i>
+                        </button>
+                    `;
+                    
+                    disadvantagesContainer.appendChild(disadvantageDiv);
+                    
+                    disadvantageDiv.querySelector('.remove-disadvantage-btn').addEventListener('click', function() {
+                        disadvantageDiv.remove();
+                    });
+                });
+            });
+        }
+
+        function saveDecision() {
+            const selectedOption = document.querySelector('input[name="decisionOption"]:checked');
+            if (!selectedOption) {
+                alert('Silakan pilih salah satu opsi terlebih dahulu');
+                return;
+            }
+            
+            const reason = document.getElementById('decisionReason').value;
+            const comparison = comparisons.find(c => c.id === currentComparisonId);
+            
+            comparison.decision = {
+                selectedOption: selectedOption.value,
+                reason,
+                decidedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('comparisons', JSON.stringify(comparisons));
+            
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <strong>Keputusan berhasil disimpan!</strong> Anda telah memilih ${selectedOption.value} sebagai opsi terbaik.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.getElementById('decision-tab-pane').prepend(alertDiv);
+            
+            // Update the decision tab
+            renderDecisionTab(comparison);
+            
+            // Update the comparisons list
+            renderComparisonsList();
+        }
+
+        // Utility functions
+        function formatPrice(price) {
+            return 'Rp ' + price.toLocaleString('id-ID');
+        }
+
+        function getMinPrice(options) {
+            return Math.min(...options.map(option => option.price));
+        }
+
+        function getMaxPrice(options) {
+            return Math.max(...options.map(option => option.price));
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
